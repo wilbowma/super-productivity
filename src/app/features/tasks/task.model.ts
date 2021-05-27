@@ -100,7 +100,22 @@ export interface TaskWithReminderData extends Task {
   readonly parentData?: Task;
 }
 
+export interface TaskWithReminder extends Task {
+  reminderId: string;
+  plannedAt: number;
+}
+
+export interface TaskPlanned extends Task {
+  plannedAt: number;
+}
+
+export interface TaskWithoutReminder extends Task {
+  reminderId: null;
+  plannedAt: null;
+}
+
 export interface TaskWithSubTasks extends Task {
+  // TODO make sub tasks not optional (and remove from task component)
   readonly subTasks?: Task[];
 }
 

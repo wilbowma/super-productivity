@@ -88,7 +88,7 @@ export const taskReducer = (
   action: TaskActions | AddTaskRepeatCfgToTask | TaskAttachmentActions,
 ): TaskState => {
   if (environment.production) {
-    console.log(action.type, (action as any)?.payload || action, state);
+    console.log(action.type, (action as any)?.payload || action);
   }
 
   // TODO fix this hackyness once we use the new syntax everywhere
@@ -207,11 +207,8 @@ export const taskReducer = (
 
     // TODO simplify
     case TaskActionTypes.ToggleTaskShowSubTasks: {
-      const {
-        taskId,
-        isShowLess,
-        isEndless,
-      } = (action as ToggleTaskShowSubTasks).payload;
+      const { taskId, isShowLess, isEndless } = (action as ToggleTaskShowSubTasks)
+        .payload;
       const task = state.entities[taskId] as Task;
       const subTasks = task.subTaskIds.map((id) => state.entities[id] as Task);
       const doneTasksLength = subTasks.filter((t) => t.isDone).length;
@@ -278,12 +275,8 @@ export const taskReducer = (
 
     case TaskActionTypes.MoveSubTask: {
       let newState = state;
-      const {
-        taskId,
-        srcTaskId,
-        targetTaskId,
-        newOrderedIds,
-      } = (action as MoveSubTask).payload;
+      const { taskId, srcTaskId, targetTaskId, newOrderedIds } = (action as MoveSubTask)
+        .payload;
       const oldPar = state.entities[srcTaskId] as Task;
       const newPar = state.entities[targetTaskId] as Task;
 
@@ -471,13 +464,9 @@ export const taskReducer = (
     }
 
     case TaskActionTypes.RoundTimeSpentForDay: {
-      const {
-        day,
-        taskIds,
-        isRoundUp,
-        roundTo,
-        projectId,
-      } = (action as RoundTimeSpentForDay).payload;
+      const { day, taskIds, isRoundUp, roundTo, projectId } = (
+        action as RoundTimeSpentForDay
+      ).payload;
       const isLimitToProject: boolean = !!projectId || projectId === null;
 
       const idsToUpdateDirectly: string[] = taskIds.filter((id) => {

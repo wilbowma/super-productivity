@@ -236,7 +236,7 @@ describe('isValidAppData()', () => {
       ).toThrowError(`Inconsistent Task State: Lonely Sub Task in Today`);
     });
 
-    xit('missing tag for task', () => {
+    it('missing tag for task', () => {
       expect(() =>
         isValidAppData({
           ...mock,
@@ -250,7 +250,24 @@ describe('isValidAppData()', () => {
             ]),
           } as any,
         }),
-      ).toThrowError(`No tagX`);
+      ).toThrowError(`tagId "Non existent" from task not existing`);
+    });
+
+    it('missing tag for task in archive', () => {
+      expect(() =>
+        isValidAppData({
+          ...mock,
+          taskArchive: {
+            ...mock.taskArchive,
+            ...fakeEntityStateFromArray<Task>([
+              {
+                ...DEFAULT_TASK,
+                tagIds: ['Non existent'],
+              },
+            ]),
+          } as any,
+        }),
+      ).toThrowError(`tagId "Non existent" from task archive not existing`);
     });
 
     it('missing projectIds for task', () => {

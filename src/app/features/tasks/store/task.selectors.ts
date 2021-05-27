@@ -1,6 +1,6 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { TASK_FEATURE_NAME } from './task.reducer';
-import { Task, TaskState, TaskWithSubTasks } from '../task.model';
+import { Task, TaskPlanned, TaskState, TaskWithSubTasks } from '../task.model';
 import { taskAdapter } from './task.adapter';
 import { devError } from '../../../util/dev-error';
 import { TODAY_TAG } from '../../tag/tag.const';
@@ -148,32 +148,11 @@ export const selectCurrentTaskParentOrCurrent = createSelector(
     s.entities[s.currentTaskId],
 );
 
-export const selectPlannedTasks = createSelector(selectTaskFeatureState, (s): Task[] => {
-  const allTasks: Task[] = [];
-  const allParent = s.ids
-    .map((id) => s.entities[id] as Task)
-    .filter(
-      (task) => !task.parentId && (task.plannedAt || task.tagIds.includes(TODAY_TAG.id)),
-    );
-
-  allParent.forEach((pt) => {
-    if (pt.subTaskIds.length) {
-      pt.subTaskIds.forEach((subId) => {
-        const st = s.entities[subId] as Task;
-        // const par: Task = s.entities[st.parentId as string] as Task;
-        allTasks.push({
-          ...st,
-          plannedAt:
-            st.plannedAt ||
-            (!st.isDone ? (s.entities[st.parentId as string] as Task).plannedAt : null),
-        });
-      });
-    } else {
-      allTasks.push(pt);
-    }
-  });
-  return allTasks;
-});
+// export const selectScheduledTasksWithReminder = createSelector(
+//   selectPlannedTasks,
+//   (tasks: Task[]): TaskWithReminder[] =>
+//     tasks.filter((task) => !!task.reminderId) as TaskWithReminder[],
+// );
 
 export const selectAllTasks = createSelector(selectTaskFeatureState, selectAll);
 export const selectScheduledTasks = createSelector(selectAllTasks, (tasks) =>
@@ -244,6 +223,34 @@ export const selectTasksWorkedOnOrDoneFlat = createSelector(
     );
   },
 );
+
+export const selectTasksPlannedForRange = createSelector(
+  selectAllTasks,
+  (tasks: Task[], { start, end }: { start: number; end: number }): TaskPlanned[] => {
+    return tasks.filter(
+      (task) =>
+        !task.isDone &&
+        typeof task.plannedAt === 'number' &&
+        task.plannedAt >= start &&
+        task.plannedAt <= end,
+    ) as TaskPlanned[];
+  },
+);
+
+export const selectTasksPlannedForRangeNotOnToday = createSelector(
+  selectAllTasks,
+  (tasks: Task[], { start, end }: { start: number; end: number }): TaskPlanned[] => {
+    return tasks.filter(
+      (task) =>
+        !task.isDone &&
+        typeof task.plannedAt === 'number' &&
+        task.plannedAt >= start &&
+        task.plannedAt <= end &&
+        !task.tagIds.includes(TODAY_TAG.id),
+    ) as TaskPlanned[];
+  },
+);
+// export const selectTasksPlannedForRange
 
 // REPEATABLE TASKS
 // ----------------

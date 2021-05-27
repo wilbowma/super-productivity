@@ -48,8 +48,10 @@ export const INPUT_DURATION_VALIDATORS: any = {
   ],
 })
 export class InputDurationDirective<D>
-  implements ControlValueAccessor, Validator, AfterViewChecked {
+  implements ControlValueAccessor, Validator, AfterViewChecked
+{
   @Input() isAllowSeconds: boolean = false;
+  @Input() isValidate: boolean = true;
 
   // by the Control Value Accessor
   // @ts-ignore
@@ -123,7 +125,7 @@ export class InputDurationDirective<D>
 
   // ControlValueAccessor: Validator
   validate(c: AbstractControl): ValidationErrors | null {
-    return this._validator !== null && this._validator !== undefined
+    return this._validator !== null && this._validator !== undefined && this.isValidate
       ? this._validator(c)
       : null;
   }

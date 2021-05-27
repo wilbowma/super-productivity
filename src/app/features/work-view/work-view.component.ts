@@ -23,7 +23,7 @@ import {
   timer,
   zip,
 } from 'rxjs';
-import { TaskWithSubTasks } from '../tasks/task.model';
+import { TaskPlanned, TaskWithSubTasks } from '../tasks/task.model';
 import { delay, filter, map, switchMap } from 'rxjs/operators';
 import { fadeAnimation } from '../../ui/animations/fade.ani';
 import { PlanningModeService } from '../planning-mode/planning-mode.service';
@@ -31,6 +31,7 @@ import { T } from '../../t.const';
 import { ImprovementService } from '../metric/improvement/improvement.service';
 import { workViewProjectChangeAnimation } from '../../ui/animations/work-view-project-change.ani';
 import { WorkContextService } from '../work-context/work-context.service';
+import { TODAY_TAG } from '../tag/tag.const';
 
 const SUB = 'SUB';
 const PARENT = 'PARENT';
@@ -59,19 +60,21 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
   T: typeof T = T;
 
   // NOTE: not perfect but good enough for now
-  isTriggerBacklogIconAni$: Observable<boolean> = this.workContextService.onMoveToBacklog$.pipe(
-    switchMap(() => zip(from([true, false]), timer(1, 200))),
-    map((v) => v[0]),
-  );
+  isTriggerBacklogIconAni$: Observable<boolean> =
+    this.workContextService.onMoveToBacklog$.pipe(
+      switchMap(() => zip(from([true, false]), timer(1, 200))),
+      map((v) => v[0]),
+    );
   splitTopEl$: ReplaySubject<HTMLElement> = new ReplaySubject(1);
 
   // TODO make this work for tag page without backlog
-  upperContainerScroll$: Observable<Event> = this.workContextService.isContextChanging$.pipe(
-    filter((isChanging) => !isChanging),
-    delay(50),
-    switchMap(() => this.splitTopEl$),
-    switchMap((el) => fromEvent(el, 'scroll')),
-  );
+  upperContainerScroll$: Observable<Event> =
+    this.workContextService.isContextChanging$.pipe(
+      filter((isChanging) => !isChanging),
+      delay(50),
+      switchMap(() => this.splitTopEl$),
+      switchMap((el) => fromEvent(el, 'scroll')),
+    );
   private _subs: Subscription = new Subscription();
   private _switchListAnimationTimeout?: number;
 
@@ -158,6 +161,13 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
 
   startWork() {
     this.planningModeService.leavePlanningMode();
+  }
+
+  addAllPlannedToToday(plannedTasks: TaskPlanned[]) {
+    plannedTasks.forEach((t) => {
+      this.taskService.moveToToday(t.id);
+      this.taskService.updateTags(t, [...t.tagIds, TODAY_TAG.id], t.tagIds);
+    });
   }
 
   resetBreakTimer() {

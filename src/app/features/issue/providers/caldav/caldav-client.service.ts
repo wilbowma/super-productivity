@@ -238,7 +238,6 @@ export class CaldavClientService {
   }
 
   getById$(id: string | number, caldavCfg: CaldavCfg): Observable<CaldavIssue> {
-    console.log(id);
     if (typeof id === 'number') {
       id = id.toString(10);
     }
@@ -315,10 +314,9 @@ export class CaldavClientService {
     filterCategory: boolean,
   ): Promise<CaldavIssue[]> {
     const cal = await this._getCalendar(cfg);
-    const tasks = await CaldavClientService._getAllTodos(
-      cal,
-      filterOpen,
-    ).catch((err: any) => this._handleNetErr(err));
+    const tasks = await CaldavClientService._getAllTodos(cal, filterOpen).catch(
+      (err: any) => this._handleNetErr(err),
+    );
     return tasks
       .map((t: any) => CaldavClientService._mapTask(t))
       .filter(

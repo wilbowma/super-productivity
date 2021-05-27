@@ -38,6 +38,15 @@ export class ElectronService {
       this.remote = electron.remote;
       // NOTE: works for non-sandboxed electron only
       this.shell = (electron as any).shell;
+
+      // log to file for production
+      // if (environment.production || environment.stage) {
+      // const log = (this.remote as typeof remote).require('electron-log');
+      // log.transports.maxSize = 1024 * 1024 * 20;
+      // console.error = log.error;
+      // console.log = log.log;
+      // console.warn = log.warn;
+      // }
     }
 
     // NOTE: useful in case we want to disable the node integration

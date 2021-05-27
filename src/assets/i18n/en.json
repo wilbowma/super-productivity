@@ -453,7 +453,7 @@
     "PROCRASTINATION": {
       "BACK_TO_WORK": "Back to work!",
       "COMP": {
-        "INTRO": "Showing yourself some compassion is always a great idea. It improves your feeling of self-worth, fosters positive emotions and can help you overcome procrastination, of course. Try a little exercise:",
+        "INTRO": "People with high procrastination levels usually have low self-compassion. So practice it! It improves your feeling of self-worth, fosters positive emotions and can help you overcome procrastination, of course. Try a little exercise:",
         "L1": "Sit down for bit and stretch yourself, if you like, calm down a little bit",
         "L2": "Try to listen to the thoughts and feelings that arise",
         "L3": "Are you responding to yourself in a way that you would respond to a friend?",
@@ -701,6 +701,12 @@
         "DATETIME_FOR": "Datetime for reminder",
         "EDIT": "Edit Reminder",
         "MOVE_TO_BACKLOG": "Move task to backlog until scheduled",
+        "RO_10M": "10 minutes before it starts",
+        "RO_15M": "15 minutes before it starts",
+        "RO_1H": "1 hour before it starts",
+        "RO_30M": "30 minutes before it starts",
+        "RO_5M": "5 minutes before it starts",
+        "RO_START": "when it starts",
         "SCHEDULE": "Schedule",
         "UNSCHEDULE": "Unschedule"
       },
@@ -715,9 +721,9 @@
         "FOR_OTHER": "Task is due. Do you want to start working on it?",
         "FROM_PROJECT": "From Project: \"{{title}}\"",
         "FROM_TAG": "From Tag: \"{{title}}\"",
+        "RESCHEDULE_UNTIL_TOMORROW": "Re-schedule for tomorrow",
         "SNOOZE": "Snooze",
         "SNOOZE_ALL": "Snooze all",
-        "SNOOZE_UNTIL_TOMORROW": "Until tomorrow",
         "START": "Start",
         "SWITCH_CONTEXT_START": "Switch Context & Start"
       },
@@ -785,6 +791,18 @@
         "TUESDAY": "Tuesday",
         "WEDNESDAY": "Wednesday"
       }
+    },
+    "TIMELINE": {
+      "CONTINUED": "continued",
+      "D_INITIAL": {
+        "TEXT": "<p>The idea of the Timeline is to provide a better picture of how one's planned tasks play out over time. It is automatically generated from your Tasks and distinguishes two different things: <strong>Scheduled Tasks</strong>, which are shown at their planned time and <strong>Regular Tasks</strong> which should flow around those fixed events. All tasks consider the time estimates you have assigned to them.</p><p>In addition to this you can also provide a work start and end time. If configured regular tasks will never show up outside of these. Please note that the timeline only includes the upcoming 30 days.</p>",
+        "TITLE": "Timeline"
+      },
+      "END": "Work End",
+      "MENU_TITLE": "Timeline",
+      "NOW": "Now",
+      "NO_TASKS": "Currently there are no tasks. Please add some tasks via the + Button in the top bar.",
+      "START": "Work Start"
     },
     "TIME_TRACKING": {
       "B": {
@@ -937,6 +955,7 @@
       "GO_TO_FOCUS_MODE": "Go to Focus Mode",
       "GO_TO_SCHEDULED_VIEW": "Go to scheduled Tasks",
       "GO_TO_SETTINGS": "Go to Settings",
+      "GO_TO_TIMELINE": "Go to Timeline",
       "GO_TO_WORK_VIEW": "Go to Work View",
       "HELP": "<p>Here you can configure all keyboard shortcuts.</p> <p>Click on the text input and enter the desired keyboard combination. Hit enter to save and Escape to abort.</p> <p>There are three types of shortcuts:</p> <ul> <li> <strong>Global shortcuts:</strong> When the app is running it will trigger the action from every other application. </li> <li> <strong>Application level shortcuts:</strong> Will trigger from every screen of the application, but not if you're currently editing a text field. </li> <li> <strong>Task level shortcuts:</strong> They will only trigger if you have selected a task via mouse or keyboard and usually trigger an action specifically related to that one task. </li> </ul><p>You can <strong>press Escape to remove a shortcut.</strong>",
       "MOVE_TASK_DOWN": "Move Task down in List",
@@ -949,6 +968,7 @@
       "SYSTEM_SHORTCUTS": "Global Shortcuts (system wide)",
       "TASK_ADD_SUB_TASK": "Add sub Task",
       "TASK_DELETE": "Delete Task",
+      "TASK_EDIT_TAGS": "Edit Tags",
       "TASK_EDIT_TITLE": "Edit Title",
       "TASK_MOVE_TO_PROJECT": "Open move task to project menu",
       "TASK_OPEN_CONTEXT_MENU": "Open task context menu",
@@ -962,7 +982,6 @@
       "TOGGLE_BACKLOG": "Show/Hide Task Backlog",
       "TOGGLE_BOOKMARKS": "Show/Hide Bookmark Bar",
       "TOGGLE_PLAY": "Start/Stop Task",
-      "TASK_EDIT_TAGS": "Edit Tags",
       "TOGGLE_SIDE_NAV": "Show & Focus/Hide Sidenav",
       "ZOOM_DEFAULT": "Zoom default (Desktop only)",
       "ZOOM_IN": "Zoom in (Desktop only)",
@@ -1001,7 +1020,7 @@
       "IS_HIDE_NAV": "Hide navigation until main header is hovered (desktop only)",
       "IS_MINIMIZE_TO_TRAY": "Minimize to tray (desktop only)",
       "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notify when time estimate was exceeded",
-      "IS_TRAY_SHOW_CURRENT_TASK": "Show current task in the tray / status menu (desktop only)",
+      "IS_TRAY_SHOW_CURRENT_TASK": "Show current task in the tray / status menu (desktop mac/windows only)",
       "IS_TURN_OFF_MARKDOWN": "Turn off markdown parsing for notes",
       "TASK_NOTES_TPL": "Task description template",
       "TITLE": "Misc Settings"
@@ -1033,9 +1052,18 @@
       "IS_FOCUS_WINDOW": "Focus app window when reminder is active (desktop only)",
       "IS_LOCK_SCREEN": "Lock screen when a break is due (desktop only)",
       "MESSAGE": "Take a break message",
+      "SNOOZE_TIME": "Snooze time when prompted to take a break",
       "MIN_WORKING_TIME": "Trigger take a break notification after X working without one",
       "MOTIVATIONAL_IMG": "Motivational image (web url)",
       "TITLE": "Break Reminder"
+    },
+    "TIMELINE": {
+      "HELP": "The timeline feature should provide you with a quick overview over how your planned tasks play out over time. You can find it in the left hand menu under <a href='#/timeline'>'Timeline'</a>. ",
+      "L_IS_WORK_START_END_ENABLED": "Limit unscheduled task flow to specific work times",
+      "L_WORK_END": "Work Day End",
+      "L_WORK_START": "Work Day Start",
+      "TITLE": "Timeline",
+      "WORK_START_END_DESCRIPTION": "e.g. 17:00"
     },
     "TRACKING_REMINDER": {
       "HELP": "Configure a banner to show up in case you forgot to start time tracking.",
@@ -1198,6 +1226,8 @@
   },
   "WW": {
     "ADD_MORE": "Add more",
+    "ADD_SCHEDULED_FOR_TODAY": "Add tasks planned for today ({{nr}})",
+    "ADD_SCHEDULED_FOR_TOMORROW": "Add tasks planned for tomorrow ({{nr}})",
     "ADD_SOME_TASKS": "Add some tasks to plan your day!",
     "COMPLETED_TASKS": "Completed Tasks",
     "ESTIMATE_REMAINING": "Estimate remaining:",

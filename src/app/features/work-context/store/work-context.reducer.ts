@@ -1,44 +1,11 @@
 import * as contextActions from './work-context.actions';
 import { WorkContextState, WorkContextType } from '../work-context.model';
-import {
-  Action,
-  createFeatureSelector,
-  createReducer,
-  createSelector,
-  on,
-} from '@ngrx/store';
-
-export const WORK_CONTEXT_FEATURE_NAME = 'context';
-
-export const selectContextFeatureState = createFeatureSelector<WorkContextState>(
-  WORK_CONTEXT_FEATURE_NAME,
-);
-export const selectActiveContextId = createSelector(
-  selectContextFeatureState,
-  (state) => state.activeId,
-);
-export const selectActiveContextType = createSelector(
-  selectContextFeatureState,
-  (state) => state.activeType,
-);
-
-export const selectActiveContextTypeAndId = createSelector(
-  selectContextFeatureState,
-  (
-    state: WorkContextState,
-  ): {
-    activeId: string;
-    activeType: WorkContextType;
-    // additional entities state properties
-  } => ({
-    activeType: state.activeType as WorkContextType,
-    activeId: state.activeId as string,
-  }),
-);
+import { Action, createReducer, on } from '@ngrx/store';
+import { TODAY_TAG } from '../../tag/tag.const';
 
 export const initialContextState: WorkContextState = {
-  activeId: null,
-  activeType: null,
+  activeId: TODAY_TAG.id,
+  activeType: WorkContextType.TAG,
 };
 
 const _reducer = createReducer<WorkContextState>(

@@ -32,7 +32,8 @@ export class IdleService {
   private _idleTime$: BehaviorSubject<number> = new BehaviorSubject(0);
   idleTime$: Observable<number> = this._idleTime$.asObservable();
   private _triggerResetBreakTimer$: Subject<boolean> = new Subject();
-  triggerResetBreakTimer$: Observable<boolean> = this._triggerResetBreakTimer$.asObservable();
+  triggerResetBreakTimer$: Observable<boolean> =
+    this._triggerResetBreakTimer$.asObservable();
 
   private lastCurrentTaskId?: string | null;
   private isIdleDialogOpen: boolean = false;
@@ -74,7 +75,6 @@ export class IdleService {
   }
 
   handleIdle(idleTime: number) {
-    console.log('IDLE_TIME', idleTime, new Date());
     const gCfg = this._configService.cfg;
     if (!gCfg) {
       throw new Error();

@@ -4,15 +4,7 @@ import { GithubApiService } from '../github-api.service';
 import { SnackService } from '../../../../../core/snack/snack.service';
 import { TaskService } from '../../../../tasks/task.service';
 import { ProjectService } from '../../../../project/project.service';
-import {
-  filter,
-  first,
-  map,
-  switchMap,
-  takeUntil,
-  tap,
-  withLatestFrom,
-} from 'rxjs/operators';
+import { filter, first, map, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { IssueService } from '../../../issue.service';
 import { forkJoin, Observable, timer } from 'rxjs';
 import { GITHUB_INITIAL_POLL_DELAY, GITHUB_POLL_INTERVAL } from '../github.const';
@@ -42,61 +34,57 @@ export class GithubIssueEffects {
             // NOTE: required otherwise timer stays alive for filtered actions
             takeUntil(this._issueEffectHelperService.pollToBacklogActions$),
             tap(() => console.log('GITHUB_POLL_BACKLOG_CHANGES')),
-            withLatestFrom(
-              this._githubApiService.getLast100IssuesForRepo$(githubCfg),
-              this._taskService.getAllIssueIdsForProject(pId, GITHUB_TYPE) as Promise<
-                number[]
-              >,
+            switchMap(() =>
+              forkJoin([
+                this._githubApiService.getLast100IssuesForRepo$(githubCfg),
+                this._taskService.getAllIssueIdsForProject(pId, GITHUB_TYPE) as Promise<
+                  number[]
+                >,
+              ]),
             ),
-            tap(
-              ([, issues, allTaskGithubIssueIds]: [
-                any,
-                GithubIssueReduced[],
-                number[],
-              ]) => {
-                const issuesToAdd = issues.filter(
-                  (issue) => !allTaskGithubIssueIds.includes(issue.id),
-                );
-                console.log('issuesToAdd', issuesToAdd);
-                if (issuesToAdd?.length) {
-                  this._importNewIssuesToBacklog(pId, issuesToAdd);
-                }
-              },
-            ),
+            tap(([issues, allTaskGithubIssueIds]: [GithubIssueReduced[], number[]]) => {
+              const issuesToAdd = issues
+                .filter((issue) => !allTaskGithubIssueIds.includes(issue.id))
+                .sort((a, b) => a.id - b.id);
+              if (issuesToAdd?.length) {
+                this._importNewIssuesToBacklog(pId, issuesToAdd);
+              }
+            }),
           ),
         ),
       ),
     ),
   );
-  private _updateIssuesForCurrentContext$: Observable<any> = this._workContextService.allTasksForCurrentContext$.pipe(
-    first(),
-    switchMap((tasks) => {
-      const gitIssueTasks = tasks.filter((task) => task.issueType === GITHUB_TYPE);
-      return forkJoin(
-        gitIssueTasks.map((task) => {
-          if (!task.projectId) {
-            throw new Error('No project for task');
-          }
-          return this._projectService.getGithubCfgForProject$(task.projectId).pipe(
-            first(),
-            map((cfg) => ({
-              cfg,
-              task,
-            })),
-          );
-        }),
-      );
-    }),
-    map((cos) =>
-      cos
-        .filter(
-          ({ cfg, task }: { cfg: GithubCfg; task: TaskWithSubTasks }): boolean =>
-            isGithubEnabled(cfg) && cfg.isAutoPoll,
-        )
-        .map(({ task }: { cfg: GithubCfg; task: TaskWithSubTasks }) => task),
-    ),
-    tap((githubTasks: TaskWithSubTasks[]) => this._refreshIssues(githubTasks)),
-  );
+  private _updateIssuesForCurrentContext$: Observable<any> =
+    this._workContextService.allTasksForCurrentContext$.pipe(
+      first(),
+      switchMap((tasks) => {
+        const gitIssueTasks = tasks.filter((task) => task.issueType === GITHUB_TYPE);
+        return forkJoin(
+          gitIssueTasks.map((task) => {
+            if (!task.projectId) {
+              throw new Error('No project for task');
+            }
+            return this._projectService.getGithubCfgForProject$(task.projectId).pipe(
+              first(),
+              map((cfg) => ({
+                cfg,
+                task,
+              })),
+            );
+          }),
+        );
+      }),
+      map((cos) =>
+        cos
+          .filter(
+            ({ cfg, task }: { cfg: GithubCfg; task: TaskWithSubTasks }): boolean =>
+              isGithubEnabled(cfg) && cfg.isAutoPoll,
+          )
+          .map(({ task }: { cfg: GithubCfg; task: TaskWithSubTasks }) => task),
+      ),
+      tap((githubTasks: TaskWithSubTasks[]) => this._refreshIssues(githubTasks)),
+    );
   @Effect({ dispatch: false })
   pollIssueChangesForCurrentContext$: Observable<any> = this._issueEffectHelperService.pollIssueTaskUpdatesActions$.pipe(
     switchMap(() => this._pollTimer$),

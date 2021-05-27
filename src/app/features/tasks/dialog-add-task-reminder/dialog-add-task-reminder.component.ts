@@ -8,6 +8,7 @@ import { AddTaskReminderInterface } from './add-task-reminder-interface';
 import { throttle } from 'helpful-decorators';
 import { Task, TaskReminderOption, TaskReminderOptionId } from '../task.model';
 import { millisecondsDiffToRemindOption } from '../util/remind-option-to-milliseconds';
+import { LS_LAST_IS_MOVE_SCHEDULED_TO_BACKLOG } from '../../../core/persistence/ls-keys.const';
 
 @Component({
   selector: 'dialog-add-task-reminder',
@@ -26,7 +27,7 @@ export class DialogAddTaskReminderComponent {
   dateTime?: number = this.task.plannedAt || undefined;
   isShowMoveToBacklog: boolean =
     !this.isEdit && !!this.task.projectId && this.task.parentId === null;
-  isMoveToBacklog: boolean = this.isShowMoveToBacklog;
+  isMoveToBacklog: boolean;
   // TODO make translatable
   remindAvailableOptions: TaskReminderOption[] = [
     {
@@ -34,27 +35,27 @@ export class DialogAddTaskReminderComponent {
       // title: 'Dont show reminder',
       // }, {
       id: TaskReminderOptionId.AtStart,
-      title: 'when it starts',
+      title: T.F.TASK.D_REMINDER_ADD.RO_START,
     },
     {
       id: TaskReminderOptionId.m5,
-      title: '5 minutes before it starts',
+      title: T.F.TASK.D_REMINDER_ADD.RO_5M,
     },
     {
       id: TaskReminderOptionId.m10,
-      title: '10 minutes before it starts',
+      title: T.F.TASK.D_REMINDER_ADD.RO_10M,
     },
     {
       id: TaskReminderOptionId.m15,
-      title: '15 minutes before it starts',
+      title: T.F.TASK.D_REMINDER_ADD.RO_15M,
     },
     {
       id: TaskReminderOptionId.m30,
-      title: '30 minutes before it starts',
+      title: T.F.TASK.D_REMINDER_ADD.RO_30M,
     },
     {
       id: TaskReminderOptionId.h1,
-      title: '1 hour before it starts',
+      title: T.F.TASK.D_REMINDER_ADD.RO_1H,
     },
   ];
   reminderCfgId: TaskReminderOptionId;
@@ -73,6 +74,17 @@ export class DialogAddTaskReminderComponent {
     } else {
       this.reminderCfgId = TaskReminderOptionId.AtStart;
     }
+
+    const lsLastIsMoveToBacklog = localStorage.getItem(
+      LS_LAST_IS_MOVE_SCHEDULED_TO_BACKLOG,
+    );
+    // NOTE: JSON.parse is good for parsing string booleans
+    const lastIsMoveToBacklog =
+      lsLastIsMoveToBacklog && JSON.parse(lsLastIsMoveToBacklog);
+    this.isMoveToBacklog =
+      this.isShowMoveToBacklog && typeof lastIsMoveToBacklog === 'boolean'
+        ? lastIsMoveToBacklog
+        : this.isShowMoveToBacklog;
   }
 
   // NOTE: throttle is used as quick way to prevent multiple submits
@@ -99,6 +111,10 @@ export class DialogAddTaskReminderComponent {
         timestamp,
         this.reminderCfgId,
         this.isMoveToBacklog,
+      );
+      localStorage.setItem(
+        LS_LAST_IS_MOVE_SCHEDULED_TO_BACKLOG,
+        this.isMoveToBacklog + '',
       );
       this.close();
     }

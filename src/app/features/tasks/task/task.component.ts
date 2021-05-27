@@ -1,5 +1,6 @@
 import {
   AfterViewInit,
+  Attribute,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
@@ -13,7 +14,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { TaskService } from '../task.service';
-import { Observable, of, ReplaySubject, Subject } from 'rxjs';
+import { EMPTY, Observable, of, ReplaySubject, Subject } from 'rxjs';
 import {
   ShowSubTasksMode,
   TaskAdditionalInfoTargetPanel,
@@ -52,8 +53,10 @@ import { throttle } from 'helpful-decorators';
   animations: [expandAnimation, fadeAnimation, swirlAnimation],
 })
 export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
-  task!: TaskWithSubTasks;
   @Input() isBacklog: boolean = false;
+  isShowParentTitle: boolean = !!this.showParentTitle;
+
+  task!: TaskWithSubTasks;
   T: typeof T = T;
   IS_TOUCH_ONLY: boolean = IS_TOUCH_ONLY;
   isDragOver: boolean = false;
@@ -96,6 +99,27 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     distinctUntilChanged(),
     switchMap((pid) => this._projectService.getProjectsWithoutId$(pid)),
   );
+
+  parentTitle$: Observable<string> = this.isShowParentTitle
+    ? this._task$.pipe(
+        take(1),
+        switchMap((task) => this._taskService.getByIdLive$(task.parentId as string)),
+        map((task) => task.title),
+      )
+    : EMPTY;
+
+  projectColor$: Observable<string> = this.isShowParentTitle
+    ? this._task$.pipe(
+        take(1),
+        switchMap((task) =>
+          task.projectId ? this._projectService.getByIdOnce$(task.projectId) : EMPTY,
+        ),
+        map((project) => project.theme.primary),
+      )
+    : EMPTY;
+
+  isFirstLineHover: boolean = false;
+
   private _dragEnterTarget?: HTMLElement;
   private _destroy$: Subject<boolean> = new Subject<boolean>();
   private _currentPanTimeout?: number;
@@ -112,6 +136,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly _cd: ChangeDetectorRef,
     private readonly _projectService: ProjectService,
     public readonly workContextService: WorkContextService,
+    @Attribute('showParentTitle') private showParentTitle: string,
   ) {}
 
   @Input('task') set taskSet(v: TaskWithSubTasks) {
@@ -241,14 +266,19 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this._taskService.setSelectedId(this.task.id);
   }
 
-  deleteTask() {
+  deleteTask(isClick: boolean = false) {
+    // NOTE: prevents attempts to delete the same task multiple times
     if (this._isTaskDeleteTriggered) {
       return;
     }
 
     this._isTaskDeleteTriggered = true;
     this._taskService.remove(this.task);
-    this.focusNext(true);
+    // NOTE: in case we want the focus behaviour on click we could use:
+    // this.focusSelf();
+    if (!isClick) {
+      this.focusNext(true);
+    }
   }
 
   startTask() {
@@ -560,6 +590,9 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
   moveToBacklog() {
     this._taskService.moveToBacklog(this.task.id);
+    if (this.task.tagIds.includes(TODAY_TAG.id)) {
+      this.removeFromMyDay();
+    }
   }
 
   moveToToday() {

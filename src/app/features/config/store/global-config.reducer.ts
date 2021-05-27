@@ -7,6 +7,7 @@ import {
   MiscConfig,
   SoundConfig,
   TakeABreakConfig,
+  TimelineConfig,
 } from '../global-config.model';
 import { DEFAULT_GLOBAL_CONFIG } from '../default-global-config.const';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
@@ -14,9 +15,8 @@ import { AppDataComplete } from '../../../imex/sync/sync.model';
 import { migrateGlobalConfigState } from '../migrate-global-config.util';
 
 export const CONFIG_FEATURE_NAME = 'globalConfig';
-export const selectConfigFeatureState = createFeatureSelector<GlobalConfigState>(
-  CONFIG_FEATURE_NAME,
-);
+export const selectConfigFeatureState =
+  createFeatureSelector<GlobalConfigState>(CONFIG_FEATURE_NAME);
 export const selectMiscConfig = createSelector(
   selectConfigFeatureState,
   (cfg): MiscConfig => cfg.misc,
@@ -36,6 +36,10 @@ export const selectIdleConfig = createSelector(
 export const selectTakeABreakConfig = createSelector(
   selectConfigFeatureState,
   (cfg): TakeABreakConfig => cfg.takeABreak,
+);
+export const selectTimelineConfig = createSelector(
+  selectConfigFeatureState,
+  (cfg): TimelineConfig => cfg.timeline,
 );
 
 export const initialState: GlobalConfigState = DEFAULT_GLOBAL_CONFIG;

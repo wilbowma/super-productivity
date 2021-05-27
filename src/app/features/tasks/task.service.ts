@@ -18,6 +18,7 @@ import {
   Task,
   TaskAdditionalInfoTargetPanel,
   TaskArchive,
+  TaskPlanned,
   TaskReminderOptionId,
   TaskState,
   TaskWithSubTasks,
@@ -62,7 +63,6 @@ import {
   selectCurrentTaskParentOrCurrent,
   selectIsTaskDataLoaded,
   selectMainTasksWithoutTag,
-  selectPlannedTasks,
   selectSelectedTask,
   selectSelectedTaskId,
   selectStartableTasks,
@@ -73,6 +73,7 @@ import {
   selectTasksById,
   selectTasksByRepeatConfigId,
   selectTasksByTag,
+  selectTasksPlannedForRangeNotOnToday,
   selectTaskWithSubTasksByRepeatConfigId,
 } from './store/task.selectors';
 import { getWorklogStr } from '../../util/get-work-log-str';
@@ -99,6 +100,7 @@ import { SnackService } from '../../core/snack/snack.service';
 import { T } from '../../t.const';
 import { ImexMetaService } from '../../imex/imex-meta/imex-meta.service';
 import { remindOptionToMilliseconds } from './util/remind-option-to-milliseconds';
+import { getDateRangeForDay } from '../../util/get-date-range-for-day';
 
 @Injectable({
   providedIn: 'root',
@@ -131,10 +133,11 @@ export class TaskService {
     // NOTE: we can't use share here, as we need the last emitted value
   );
 
-  taskAdditionalInfoTargetPanel$: Observable<TaskAdditionalInfoTargetPanel | null> = this._store.pipe(
-    select(selectTaskAdditionalInfoTargetPanel),
-    // NOTE: we can't use share here, as we need the last emitted value
-  );
+  taskAdditionalInfoTargetPanel$: Observable<TaskAdditionalInfoTargetPanel | null> =
+    this._store.pipe(
+      select(selectTaskAdditionalInfoTargetPanel),
+      // NOTE: we can't use share here, as we need the last emitted value
+    );
 
   currentTaskOrCurrentParent$: Observable<TaskWithSubTasks | null> = this._store.pipe(
     select(selectCurrentTaskOrParentWithData),
@@ -153,7 +156,21 @@ export class TaskService {
 
   allStartableTasks$: Observable<Task[]> = this._store.pipe(select(selectStartableTasks));
 
-  plannedTasks$: Observable<Task[]> = this._store.pipe(select(selectPlannedTasks));
+  // NOTE: this should work fine as long as the user restarts the app every day
+  // if not worst case is, that the buttons don't appear or today is shown as tomorrow
+  allPlannedForTodayNotOnToday$: Observable<TaskPlanned[]> = this._store.pipe(
+    select(selectTasksPlannedForRangeNotOnToday, getDateRangeForDay(Date.now())),
+  );
+
+  // NOTE: this should work fine as long as the user restarts the app every day
+  // if not worst case is, that the buttons don't appear or today is shown as tomorrow
+  allPlannedForTomorrowNotOnToday$: Observable<TaskPlanned[]> = this._store.pipe(
+    select(
+      selectTasksPlannedForRangeNotOnToday,
+      // eslint-disable-next-line no-mixed-operators
+      getDateRangeForDay(Date.now() + 24 * 60 * 60 * 1000),
+    ),
+  );
 
   // META FIELDS
   // -----------
@@ -729,7 +746,8 @@ export class TaskService {
 
   async getAllTasksForProject(projectId: string): Promise<Task[]> {
     const allTasks = await this._allTasksWithSubTaskData$.pipe(first()).toPromise();
-    const archiveTaskState: TaskArchive = await this._persistenceService.taskArchive.loadState();
+    const archiveTaskState: TaskArchive =
+      await this._persistenceService.taskArchive.loadState();
     const ids = (archiveTaskState && (archiveTaskState.ids as string[])) || [];
     const archiveTasks = ids.map((id) => archiveTaskState.entities[id]);
     return [...allTasks, ...archiveTasks].filter(
@@ -786,7 +804,8 @@ export class TaskService {
         subTasks: null,
       };
     } else {
-      const archiveTaskState: TaskArchive = await this._persistenceService.taskArchive.loadState();
+      const archiveTaskState: TaskArchive =
+        await this._persistenceService.taskArchive.loadState();
       const ids = archiveTaskState && (archiveTaskState.ids as string[]);
       if (ids) {
         const archiveTaskWithSameIssue = ids
